@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   mysqldb:
     image: mysql:5.7
@@ -6,12 +6,12 @@ services:
     ports:
       - "3306:3306"
     environment:
-     MYSQL_ROOT_PASSWORD: admin
-     MYSQL_DATABASE: catalog
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: catalog
 
   rabbitmq:
     container_name: rabbitmq
-    image: 'rabbitmq:management'
+    image: "rabbitmq:management"
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -34,10 +34,10 @@ services:
     container_name: setup-vault
     entrypoint: /bin/sh
     volumes:
-      - './config:/config'
+      - "./config:/config"
     environment:
-      VAULT_ADDR: 'http://vault:8200'
-      CONFIG_DIR: '/config'
+      VAULT_ADDR: "http://vault:8200"
+      CONFIG_DIR: "/config"
     command: >
       -c "
       sleep 2;
@@ -58,6 +58,9 @@ services:
       # - SELF_TRACING_ENABLED=true
       # Uncomment to enable debug logging
       # - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG
+      - ELASTIC_APM_SERVICE_NAME=zipkin
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
     ports:
       # Port used for the Zipkin UI and HTTP Api
       - 9411:9411
@@ -68,6 +71,10 @@ services:
     ports:
       - "8888:8888"
       - "18787:8787"
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=config-server
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
     depends_on:
       - rabbitmq
 
@@ -77,6 +84,10 @@ services:
     ports:
       - "8761:8761"
       - "28787:8787"
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=service-registry
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
     depends_on:
       - config-server
 
@@ -86,6 +97,10 @@ services:
     ports:
       - "8788:8788"
       - "38787:8787"
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=hystrix-dashboard
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
 
   oauth2-server:
     container_name: oauth2-server
@@ -100,6 +115,10 @@ services:
       while ! (nc -z config-server 8888 && nc -z vault 8200); do sleep 5; echo 'Waiting for vault and config-server services to start-up...'; done;
       java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8787,suspend=n -jar -Dspring.profiles.active=docker /app.jar
       "
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=oauth2-server
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
 
   catalog-service:
     container_name: catalog-service
@@ -116,6 +135,11 @@ services:
       while ! (nc -z config-server 8888 && nc -z vault 8200); do sleep 5; echo 'Waiting for vault and config-server services to start-up...'; done;
       java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8787,suspend=n -jar -Dspring.profiles.active=docker /app.jar
       "
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=catalog-service
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
+
   inventory-service:
     container_name: inventory-service
     build: ./inventory-service
@@ -131,6 +155,11 @@ services:
       while ! (nc -z config-server 8888 && nc -z vault 8200); do sleep 5; echo 'Waiting for vault and config-server services to start-up...'; done;
       java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8787,suspend=n -jar -Dspring.profiles.active=docker /app.jar
       "
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=inventory-service
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
+
   order-service:
     container_name: order-service
     build: ./order-service
@@ -140,11 +169,16 @@ services:
     depends_on:
       - config-server
     entrypoint: /bin/sh
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=order-service
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
     command: >
       -c "
       while ! (nc -z config-server 8888 && nc -z vault 8200); do sleep 5; echo 'Waiting for vault and config-server services to start-up...'; done;
       java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8787,suspend=n -jar -Dspring.profiles.active=docker /app.jar
       "
+
   shoppingcart-ui:
     container_name: shoppingcart-ui
     build: ./shoppingcart-ui
@@ -154,10 +188,12 @@ services:
     depends_on:
       - config-server
     entrypoint: /bin/sh
+    environment:
+      - ELASTIC_APM_SERVICE_NAME=shippingcard-ui
+      - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
+      - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
     command: >
       -c "
       while ! (nc -z config-server 8888 && nc -z vault 8200); do sleep 5; echo 'Waiting for vault and config-server services to start-up...'; done;
       java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8787,suspend=n -jar -Dspring.profiles.active=docker /app.jar
       "
-
-

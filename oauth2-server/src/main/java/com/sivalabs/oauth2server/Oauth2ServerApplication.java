@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+import co.elastic.apm.attach.ElasticApmAttacher;
+import org.springframework.boot.SpringApplication;
+
 @SpringBootApplication
 @EnableAuthorizationServer
 @EnableResourceServer
@@ -19,6 +22,7 @@ import java.util.Map;
 public class Oauth2ServerApplication {
 
     public static void main(String[] args) {
+        ElasticApmAttacher.attach();
         SpringApplication.run(Oauth2ServerApplication.class, args);
     }
 
