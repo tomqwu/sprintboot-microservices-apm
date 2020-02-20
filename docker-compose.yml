@@ -197,3 +197,17 @@ services:
       while ! (nc -z config-server 8888 && nc -z vault 8200); do sleep 5; echo 'Waiting for vault and config-server services to start-up...'; done;
       java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8787,suspend=n -jar -Dspring.profiles.active=docker /app.jar
       "
+
+  filebeat:
+    container_name: filebeat
+    image: docker.elastic.co/beats/filebeat:7.6.0
+    user: root
+    volumes:
+      - "$(pwd)/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - strict.perms=false
+      - output.elasticsearch.hosts=["https://fcf52dc6f0604104b66ea9b0314eb039.us-east-1.aws.found.io:9243"]
+      - cloud.id=apm-test
+      - cloud.auth=${CLOUD_AUTH}
