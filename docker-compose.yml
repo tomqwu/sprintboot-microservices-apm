@@ -192,7 +192,7 @@ services:
       - config-server
     entrypoint: /bin/sh
     environment:
-      - ELASTIC_APM_SERVICE_NAME=shippingcard-ui
+      - ELASTIC_APM_SERVICE_NAME=shoppingcard-ui
       - ELASTIC_APM_SERVER_URLS=https://85b51f1d1ee74d1991498d681a5b9494.apm.us-east-1.aws.cloud.es.io
       - ELASTIC_APM_SECRET_TOKEN=1gtgvLvwNxjHr0jVjb
       - ELASTIC_APM_ENABLE_LOG_CORRELATION=true
