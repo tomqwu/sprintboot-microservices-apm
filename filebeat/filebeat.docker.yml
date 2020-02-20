@@ -11,6 +11,9 @@ filebeat.autodiscover:
 processors:
   - add_cloud_metadata: ~
 
-filebeat.inputs:
-  - type: docker
-    containers.ids: "*"
+output.elasticsearch:
+  hosts: ["https://fcf52dc6f0604104b66ea9b0314eb039.us-east-1.aws.found.io:9243"]
+  username: elastic
+  password: noNvY48NyTwst2e8xCcqOWH8
+
+logging.level: info
