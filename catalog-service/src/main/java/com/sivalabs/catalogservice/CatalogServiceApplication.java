@@ -22,7 +22,6 @@ public class CatalogServiceApplication {
         return new RestTemplate();
     }
 
-
     public static void main(String[] args) {
         ElasticApmAttacher.attach();
         SpringApplication.run(CatalogServiceApplication.class, args);
