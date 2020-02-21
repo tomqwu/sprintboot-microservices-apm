@@ -7,10 +7,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import co.elastic.apm.opentracing.ElasticApmTracer;
+
 @RestController
 public class OrderController {
 
     private OrderRepository repo;
+    Tracer tracer = new ElasticApmTracer();
 
     @Autowired
     public OrderController(OrderRepository repo) {
@@ -19,7 +24,13 @@ public class OrderController {
 
     @PostMapping("/api/orders")
     public Order createOrder(@RequestBody Order order) {
-        return repo.save(order);
+        Span span = tracer.buildSpan("createOrder-opening-tracing-bridge").start();
+        try {
+            return repo.save(order);
+        } finally {
+            span.finish();
+        }
+        
     }
 
     @GetMapping("/api/orders/{id}")
