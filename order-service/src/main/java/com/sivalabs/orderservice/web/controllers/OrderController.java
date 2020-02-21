@@ -30,12 +30,17 @@ public class OrderController {
         } finally {
             span.finish();
         }
-        
     }
 
     @GetMapping("/api/orders/{id}")
     public Optional<Order> findOrderById(@PathVariable Long id) {
-        return repo.findById(id);
+        Span span = tracer.buildSpan("findOrderById-opening-tracing-bridge").start();
+        try {
+            return repo.findById(id);
+        } finally {
+            span.finish();
+        }
+
     }
 
 }
